@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Text Processing Playground</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .button-bar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        #output {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .stopword { color: red; font-weight: bold; }
+        .pos-NOUN { color: blue; }
+        .pos-VERB { color: green; }
+        .pos-ADJ { color: purple; }
+        .entity-PERSON { background-color: #ffe0e0; padding: 2px; border-radius: 4px; }
+        .entity-ORG { background-color: #e0ffe0; padding: 2px; border-radius: 4px; }
+        .entity-GPE { background-color: #e0e0ff; padding: 2px; border-radius: 4px; }
+        .definition {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Text Processing Playground</h1>
+    <form id="textForm">
+        <textarea name="text" rows="6" placeholder="Enter text here..."></textarea>
+        <div class="button-bar">
+            <button type="button" onclick="process('tokenize')">Tokenize</button>
+            <button type="button" onclick="process('stopwords')">Stopwords</button>
+            <button type="button" onclick="process('lemmatize')">Lemmatize</button>
+            <button type="button" onclick="process('pos')">POS Tagging</button>
+            <button type="button" onclick="process('ner')">NER</button>
+        </div>
+    </form>
+    <div id="output"></div>
+
+    <script>
+        function process(action) {
+            const formData = new FormData(document.getElementById("textForm"));
+            formData.append("action", action);
+
+            fetch("/process", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let html = "";
+                if (action === "tokenize") {
+                    html = "<div class='definition'>Tokenization splits text into smaller units (words, punctuation) so they can be analyzed individually.</div>";
+                    html += "<h3>Tokens:</h3><p>" + data.tokens.join(" | ") + "</p>";
+                }
+                else if (action === "stopwords") {
+                    html = "<div class='definition'>Stopwords are common filler words (like 'is', 'the') that add little meaning and are often removed in NLP.</div>";
+                    html += "<h3>Highlighted:</h3><p>" + data.highlighted + "</p>";
+                    html += "<h3>Cleaned:</h3><p>" + data.cleaned + "</p>";
+                }
+                else if (action === "lemmatize") {
+                    html = "<div class='definition'>Lemmatization reduces words to their base form (e.g., 'running' → 'run'), helping normalize text.</div>";
+                    html += "<h3>Lemmas:</h3><p>" + data.lemmas.join(" | ") + "</p>";
+                }
+                else if (action === "pos") {
+                    html = "<div class='definition'>POS tagging assigns each word a grammatical role (noun, verb, adjective, etc.), useful for syntactic analysis.</div>";
+                    html += "<h3>POS Tags:</h3><ul>";
+                    data.pos_tags.forEach(([word, pos]) => {
+                        html += `<li><span class="pos-${pos}">${word}</span> → ${pos}</li>`;
+                    });
+                    html += "</ul>";
+                }
+                else if (action === "ner") {
+                    html = "<div class='definition'>NER (Named Entity Recognition) identifies real-world entities like people, places, and organizations in text.</div>";
+                    html += "<h3>Entities:</h3><ul>";
+                    data.entities.forEach(([ent, label]) => {
+                        html += `<li><span class="entity-${label}">${ent}</span> → ${label}</li>`;
+                    });
+                    html += "</ul>";
+                }
+                document.getElementById("output").innerHTML = html;
+            });
+        }
+    </script>
+</body>
+</html>
