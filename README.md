@@ -22,6 +22,8 @@ NLP Engines:
 
 SpaCy: Used for tokenization, lemmatization, POS tagging, and NER.
 
+Tensorflow.js
+
 NLTK: Used specifically for managing the English stopwords list.
 
 Frontend: HTML5 with custom CSS for the playground interface.
