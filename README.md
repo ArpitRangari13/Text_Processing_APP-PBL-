@@ -1,4 +1,4 @@
-##📝 Interactive Text Processing Playground
+**📝 Interactive Text Processing Playground**
 A lightweight, Flask-based web application for exploring fundamental Natural Language Processing (NLP) tasks. This tool provides a real-time interface to visualize how text is broken down and analyzed using SpaCy and NLTK.
 
 🚀 Features
